@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Auth\LoginFromMagicLinkController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
@@ -17,6 +18,12 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return view('welcome');
 });
+
+Route::post('login', [AuthenticatedSessionController::class, 'store']);
+
+Route::get('login/wml/{user:email}', LoginFromMagicLinkController::class)
+    ->name('login.with-magic-link')
+    ->middleware('signed');
 
 Route::get('/dashboard', function () {
     return view('dashboard');

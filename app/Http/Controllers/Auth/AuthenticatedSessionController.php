@@ -9,6 +9,10 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
+use App\Models\User;
+use App\Mail\MagicLoginLink;
+use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Mail;
 
 class AuthenticatedSessionController extends Controller
 {
@@ -25,11 +29,15 @@ class AuthenticatedSessionController extends Controller
      */
     public function store(LoginRequest $request): RedirectResponse
     {
-        $request->authenticate();
+        $request->validate([
+            'email' => ['required', 'email', Rule::exists(User::class, 'email')],
+        ]);
 
-        $request->session()->regenerate();
+        Mail::to($request->email)->send(new MagicLoginLink($request->email));
 
-        return redirect()->intended(RouteServiceProvider::HOME);
+        session()->flash('status', 'We have emailed you a magic link!');
+
+        return back();
     }
 
     /**
